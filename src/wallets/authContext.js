@@ -164,7 +164,6 @@ export const AuthProvider = ({ children }) => {
       const myKeyStore = new keyStores.InMemoryKeyStore();
       //await myKeyStore.setKey("testnet", accountId, keyPair);
       const ID = generateAccountId(user.email)
-      console.log(ID)
       await myKeyStore.setKey("testnet", ID, keyPair);
       const connectionConfig = {
         networkId: "testnet",
@@ -177,13 +176,11 @@ export const AuthProvider = ({ children }) => {
       const near = await connect(connectionConfig);
       let account = null
       try {
-        console.log("Create Account")
+
         account = await near.createAccount(ID, keyPair.publicKey);
       } catch (error) {
         console.log(error)
-      }
-      console.log(account.accountId)
-      /*
+      }     
       const tx = await account.functionCall({
         contractId: contractId,
         methodName: method,
@@ -193,7 +190,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       return tx
-      */
+      
     };
 
     const logout = async () => {
