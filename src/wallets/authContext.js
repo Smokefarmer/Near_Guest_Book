@@ -176,6 +176,7 @@ export const AuthProvider = ({ children }) => {
       let account = null
       try {
         account = await near.createAccount(user.email.split("@")[0] + ".testnet", keyPair.publicKey);
+        console.log(account)
         account = await near.account(user.email.split("@")[0] + ".testnet");
       } catch (error) {
         console.log(error)
