@@ -183,7 +183,7 @@ export const AuthProvider = ({ children }) => {
       } catch (error) {
         console.log(error)
       }
-      /*
+      
       const tx = await account.functionCall({
         contractId: contractId,
         methodName: method,
@@ -193,7 +193,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       return tx
-      */
+      
     };
 
     const logout = async () => {
