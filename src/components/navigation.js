@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import NearLogo from '../../public/near-logo.svg';
 import styles from '../app/app.module.css';
-import { useAuth } from '../app/authContext';
+import { useAuth } from '../wallets/authContext';
 
 
 

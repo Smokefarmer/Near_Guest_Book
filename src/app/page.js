@@ -1,10 +1,9 @@
 'use client';
-import { useWallet } from '@/wallets/wallet-selector';
 import { providers, connect, keyStores, utils } from 'near-api-js';
 import { useState, useEffect } from 'react';
 import { HelloNearContract, NetworkId } from '../config';
 import styles from './app.module.css';
-import { useAuth } from './authContext';
+import { useAuth } from '../wallets/authContext';
 
 const CONTRACT = HelloNearContract[NetworkId];
 

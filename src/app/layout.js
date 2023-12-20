@@ -3,7 +3,7 @@ import './globals.css';
 import '@near-wallet-selector/modal-ui/styles.css';
 
 import { Navigation } from '@/components/navigation';
-import { AuthProvider } from './authContext';
+import { AuthProvider } from '../wallets/authContext';
 
 export default function RootLayout({ children }) {
 
