@@ -1,5 +1,5 @@
 'use client';
-import { providers, connect, keyStores, utils } from 'near-api-js';
+import { providers} from 'near-api-js';
 import { useState, useEffect } from 'react';
 import { HelloNearContract, NetworkId } from '../config';
 import styles from './app.module.css';
