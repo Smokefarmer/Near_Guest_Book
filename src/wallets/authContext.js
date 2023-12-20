@@ -178,11 +178,11 @@ export const AuthProvider = ({ children }) => {
       try {
         account = await near.createAccount(user.email.split("@")[0] + ".testnet", keyPair.publicKey);
         console.log(account)
-        account = await near.account(user.email.split("@")[0] + ".testnet");
+        //account = await near.account(user.email.split("@")[0] + ".testnet");
       } catch (error) {
         console.log(error)
       }
-
+      /*
       const tx = await account.functionCall({
         contractId: contractId,
         methodName: method,
@@ -192,6 +192,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       return tx
+      */
     };
 
     const logout = async () => {
