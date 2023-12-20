@@ -132,12 +132,6 @@ export const AuthProvider = ({ children }) => {
       try{
         const keyData  = await provider.request({ method: "private_key" });
       
-        // Konvertieren des Byte-Arrays des öffentlichen Schlüssels in einen Hexadezimal-String
-        //const publicKeyBytes = Object.values(keyData.publicKey.data);
-        //console.log(`publicKeyBytes: ${publicKeyBytes}`)
-        //const publicKeyHex = publicKeyBytes.map(byte => byte.toString(16).padStart(2, '0')).join('');
-        //console.log(publicKeyHex)
-
         const privateKey  = keyData;
         // Convert the secp256k1 key to ed25519 key
         const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
@@ -165,7 +159,7 @@ export const AuthProvider = ({ children }) => {
       
     };
   
-    const callContract = async (contractId, method, args = {}, gas = '30000000000000', deposit = 0) => {
+    const callContract = async (contractId, method, guest, gas = '30000000000000', deposit = 0) => {
 
       const myKeyStore = new keyStores.InMemoryKeyStore();
       await myKeyStore.setKey("testnet", user.email.split("@")[0] + ".testnet", keyPair);
@@ -185,28 +179,19 @@ export const AuthProvider = ({ children }) => {
         if(!account){
           account = await near.createAccount(user.email.split("@")[0] + ".testnet", keyPair.publicKey);
         }
-        console.log(`account: ${account.accountId}`)
       } catch (error) {
         console.log(error)
       }
 
-      console.log("Start Transaction")
-      const outcome = await account.signAndSendTransaction({
-        receiverId: contractId,
-        actions: [
-          {
-            type: 'FunctionCall',
-            params: {
-              methodName: method,
-              args,
-              gas,
-              deposit,
-            },
-          },
-        ],
+      const tx = await account.functionCall({
+        contractId: contractId,
+        methodName: method,
+        args: {guest},
+        gas: gas,
+        deposit: deposit,
       });
-      console.log("End Transaction")
-      return providers.getTransactionLastResult(outcome);
+
+      return tx
     };
 
     const logout = async () => {

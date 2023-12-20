@@ -17,22 +17,22 @@ export default function HelloNear() {
   const [showSpinner, setShowSpinner] = useState(false);
   const { user, callContract} = useAuth();
 
+  const fetchGuestList = async (contractId, method, args = {}) => {{
+    const provider = new providers.JsonRpcProvider({ url: 'https://rpc.testnet.near.org' });
+
+    let res = await provider.query({
+      request_type: 'call_function',
+      account_id: contractId,
+      method_name: method,
+      args_base64: Buffer.from(JSON.stringify(args)).toString('base64'),
+      finality: 'optimistic',
+    });
+    return JSON.parse(Buffer.from(res.result).toString());
+  }};
+
   useEffect(() => {
     setLoggedIn(!!user);
     if(user){
-      console.log("get guest list")
-      const fetchGuestList = async (contractId, method, args = {}) => {{
-        const provider = new providers.JsonRpcProvider({ url: 'https://rpc.testnet.near.org' });
-
-        let res = await provider.query({
-          request_type: 'call_function',
-          account_id: contractId,
-          method_name: method,
-          args_base64: Buffer.from(JSON.stringify(args)).toString('base64'),
-          finality: 'optimistic',
-        });
-        return JSON.parse(Buffer.from(res.result).toString());
-      }};
       try {
       fetchGuestList(CONTRACT,"get_guests",{}).then(
         guestList => setGuestList(guestList)
@@ -45,12 +45,16 @@ export default function HelloNear() {
 
   
   const saveGuest = async () => {
-
-
     setShowSpinner(true);
-    const result = await callContract(CONTRACT, 'add_guest', { guest });
-    console.log(`result: ${result}`)
+    const result = await callContract(CONTRACT, 'add_guest', guest);
     setShowSpinner(false);
+    try {
+      fetchGuestList(CONTRACT,"get_guests",{}).then(
+        guestList => setGuestList(guestList)
+      );
+      } catch (error) {
+        console.error(error);
+    }
   };
 
   return (
@@ -66,9 +70,11 @@ export default function HelloNear() {
         <h1 className="w-100"> Guest List: 
           <div>
           {guestList.map((guest, index) => (
+             guest != null ? (
             <div key={index}>
               <code>{guest}</code>{index < guestList.length - 1 ? ',' : ''}
             </div>
+            ):null
           ))}
         </div>
       </h1>
