@@ -17,7 +17,7 @@ export const Navigation = () => {
           <Link href="/" passHref legacyBehavior>
             <Image className={styles.near} priority src={NearLogo} alt="NEAR" width="30" height="24" />
           </Link>
-          {user ? `Logout (${user.email}` : 'Login'}
+          {user ? `Logout (${user.email})`: 'Login'}
         </button>
       </div>
     </nav>
