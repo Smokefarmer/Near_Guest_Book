@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
         try {
         const web3auth = new Web3Auth({
           clientId: "BD20qYbO4GTKBNz5-4WVWLcPpTbQ_E6Hj0CHM_jTRzxwG0KkV-orb1HNUdFo7LZGlmnfLxm1nefjxNXy35nSUpI",
-          web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
+          web3AuthNetwork: "sapphire_devnet",
           chainConfig: {
             chainId: "testnet",
             chainNamespace: "other",
