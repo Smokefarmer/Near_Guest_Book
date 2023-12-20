@@ -13,14 +13,14 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [accountId, setAccountId] = useState(null);
     const [balance, setBalance] = useState(null);
-    const [account, setAccount] = useState(null);
+    const [keyPair, setKeyPair] = useState(null);
   
     useEffect(() => {
       const init = async () => {
         try {
         const web3auth = new Web3Auth({
           clientId: "BD20qYbO4GTKBNz5-4WVWLcPpTbQ_E6Hj0CHM_jTRzxwG0KkV-orb1HNUdFo7LZGlmnfLxm1nefjxNXy35nSUpI",
-          web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
+          web3AuthNetwork: WEB3AUTH_NETWORK.TESTNET,
           chainConfig: {
             chainId: "testnet",
             chainNamespace: "other",
@@ -121,7 +121,6 @@ export const AuthProvider = ({ children }) => {
         return;
       }
       const user = await web3auth.getUserInfo();
-      console.log(user.accountId)
       setUser(user)
       const web3authProvider = await web3auth.connect();
       setProvider(web3authProvider);
@@ -131,8 +130,15 @@ export const AuthProvider = ({ children }) => {
         return;
       }
       try{
-        const privateKey = await provider.request({ method: "private_key" });
-        
+        const keyData  = await provider.request({ method: "private_key" });
+      
+        // Konvertieren des Byte-Arrays des öffentlichen Schlüssels in einen Hexadezimal-String
+        //const publicKeyBytes = Object.values(keyData.publicKey.data);
+        //console.log(`publicKeyBytes: ${publicKeyBytes}`)
+        //const publicKeyHex = publicKeyBytes.map(byte => byte.toString(16).padStart(2, '0')).join('');
+        //console.log(publicKeyHex)
+
+        const privateKey  = keyData;
         // Convert the secp256k1 key to ed25519 key
         const { getED25519Key } = await import("@toruslabs/openlogin-ed25519");
         const privateKeyEd25519 = getED25519Key(privateKey).sk.toString("hex");
@@ -145,40 +151,64 @@ export const AuthProvider = ({ children }) => {
 
         // Convert the base58 private key to KeyPair
         const keyPair = KeyPair.fromString(bs58encode);
-
+        setKeyPair(keyPair)
         // publicAddress
         const publicAddress = keyPair?.getPublicKey().toString();
-        console.log(publicAddress)
+
         // accountId is the account address which is where funds will be sent to.
         const accountId = utils.serialize.base_decode(publicAddress.split(":")[1]).toString("hex");
         setAccountId(accountId)
-        
-        const myKeyStore = new keyStores.InMemoryKeyStore();
-        await myKeyStore.setKey("testnet", accountId, keyPair); // accountId and keyPair from above
-        const connectionConfig = {
-          networkId: "testnet",
-          keyStore: myKeyStore,
-          nodeUrl: "https://rpc.testnet.near.org",
-          walletUrl: "https://wallet.testnet.near.org",
-          helperUrl: "https://helper.testnet.near.org",
-          explorerUrl: "https://explorer.testnet.near.org",
-        };
-        const nearConnection = await connect(connectionConfig);
-        const account = await nearConnection.account(accountId);
-        setAccount(account)
-        const accountBalance = await account.getAccountBalance();
-        const availableBalance = utils.format.formatNearAmount(accountBalance.available);
-        if(availableBalance){
-          setBalance(availableBalance)
-        }else{
-          setBalance(0)
-        }
+
       } catch (error) {
         console.error(error);
       }
       
     };
   
+    const callContract = async (contractId, method, args = {}, gas = '30000000000000', deposit = 0) => {
+
+      const myKeyStore = new keyStores.InMemoryKeyStore();
+      await myKeyStore.setKey("testnet", user.email.split("@")[0] + ".testnet", keyPair);
+      const connectionConfig = {
+        networkId: "testnet",
+        keyStore: myKeyStore,
+        nodeUrl: "https://rpc.testnet.near.org",
+        walletUrl: "https://wallet.testnet.near.org",
+        helperUrl: "https://helper.testnet.near.org",
+        explorerUrl: "https://explorer.testnet.near.org",
+      };
+      const near = await connect(connectionConfig);
+      
+      let account = null
+      try {
+        account = await near.account(user.email.split("@")[0] + ".testnet");
+        if(!account){
+          account = await near.createAccount(user.email.split("@")[0] + ".testnet", keyPair.publicKey);
+        }
+        console.log(`account: ${account.accountId}`)
+      } catch (error) {
+        console.log(error)
+      }
+
+      console.log("Start Transaction")
+      const outcome = await account.signAndSendTransaction({
+        receiverId: contractId,
+        actions: [
+          {
+            type: 'FunctionCall',
+            params: {
+              methodName: method,
+              args,
+              gas,
+              deposit,
+            },
+          },
+        ],
+      });
+      console.log("End Transaction")
+      return providers.getTransactionLastResult(outcome);
+    };
+
     const logout = async () => {
       if (!web3auth) {
         console.log("web3auth not initialized yet");
@@ -190,7 +220,7 @@ export const AuthProvider = ({ children }) => {
     };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, provider, accountId, balance, account }}>
+    <AuthContext.Provider value={{ user, login, logout, callContract }}>
       {children}
     </AuthContext.Provider>
   );

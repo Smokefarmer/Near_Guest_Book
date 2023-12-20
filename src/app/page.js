@@ -15,11 +15,12 @@ export default function HelloNear() {
   const [guestList, setGuestList] = useState(["loading..."]);
   const [loggedIn, setLoggedIn] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
-  const { user, provider, account} = useAuth();
+  const { user, callContract} = useAuth();
 
   useEffect(() => {
     setLoggedIn(!!user);
     if(user){
+      console.log("get guest list")
       const fetchGuestList = async (contractId, method, args = {}) => {{
         const provider = new providers.JsonRpcProvider({ url: 'https://rpc.testnet.near.org' });
 
@@ -39,35 +40,16 @@ export default function HelloNear() {
       } catch (error) {
         console.error(error);
       }
-    }else {
-      setGuestList(["loading..."])
     }
   }, [user]);
 
   
   const saveGuest = async () => {
-    const callMethod = async (contractId, method, args = {}, gas = '30000000000000', deposit = 0) => {
 
-      const outcome = await account.signAndSendTransaction({
-        receiverId: contractId,
-        actions: [
-          {
-            type: 'FunctionCall',
-            params: {
-              methodName: method,
-              args,
-              gas,
-              deposit,
-            },
-          },
-        ],
-      });
-
-      return providers.getTransactionLastResult(outcome);
-    };
 
     setShowSpinner(true);
-    await callMethod(CONTRACT, 'add_guest', { guest });
+    const result = await callContract(CONTRACT, 'add_guest', { guest });
+    console.log(`result: ${result}`)
     setShowSpinner(false);
   };
 

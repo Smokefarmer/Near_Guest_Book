@@ -8,7 +8,7 @@ import { useAuth } from '../wallets/authContext';
 
 
 export const Navigation = () => {
-  const { user, login, logout, accountId, balance } = useAuth();
+  const { user, login, logout} = useAuth();
 
   return (
     <nav className={styles.nav}>
@@ -17,7 +17,7 @@ export const Navigation = () => {
           <Link href="/" passHref legacyBehavior>
             <Image className={styles.near} priority src={NearLogo} alt="NEAR" width="30" height="24" />
           </Link>
-          {user ? `Logout (${user.email} / ${accountId} -> ${balance} NEAR)` : 'Login'}
+          {user ? `Logout (${user.email}` : 'Login'}
         </button>
       </div>
     </nav>
