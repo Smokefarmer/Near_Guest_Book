@@ -163,7 +163,7 @@ export const AuthProvider = ({ children }) => {
 
       const myKeyStore = new keyStores.InMemoryKeyStore();
       await myKeyStore.setKey("testnet", accountId, keyPair);
-      //await myKeyStore.setKey("testnet", user.email.split("@")[0] + ".testnet", keyPair);
+      await myKeyStore.setKey("testnet", user.email.split("@")[0] + ".testnet", keyPair);
       const connectionConfig = {
         networkId: "testnet",
         keyStore: myKeyStore,
