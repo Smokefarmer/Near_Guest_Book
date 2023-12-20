@@ -163,7 +163,8 @@ export const AuthProvider = ({ children }) => {
 
       const myKeyStore = new keyStores.InMemoryKeyStore();
       //await myKeyStore.setKey("testnet", accountId, keyPair);
-      await myKeyStore.setKey("testnet", user.email.split("@")[0] + ".testnet", keyPair);
+      ID = generateAccountId(user.email)
+      await myKeyStore.setKey("testnet", ID, keyPair);
       const connectionConfig = {
         networkId: "testnet",
         keyStore: myKeyStore,
@@ -176,7 +177,7 @@ export const AuthProvider = ({ children }) => {
       let account = null
       try {
         console.log("Create Account")
-        account = await near.createAccount(user.email.split("@")[0] + ".testnet", keyPair.publicKey);
+        account = await near.createAccount(ID, keyPair.publicKey);
       } catch (error) {
         console.log(error)
       }
@@ -203,6 +204,26 @@ export const AuthProvider = ({ children }) => {
       setProvider(null);
       setUser(null);
     };
+
+    function generateAccountId(email) {
+      // Split the email at the '@' character and take the first part
+      let userId = email.split('@')[0];
+  
+      // Keep only alphanumeric characters
+      userId = userId.replace(/[^a-zA-Z0-9]/g, '');
+  
+      // If the userId is empty, hash the email
+      if (userId.length === 0) {
+          // Create a hash from the email
+          let hash = crypto.createHash('sha256');
+          hash.update(email);
+          // Use the first 10 characters of the hexdigest
+          userId = hash.digest('hex').substring(0, 10);
+      }
+  
+      // Append the testnet domain
+      return userId + '.testnet';
+  }
 
   return (
     <AuthContext.Provider value={{ user, login, logout, callContract }}>
