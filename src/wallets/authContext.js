@@ -173,17 +173,19 @@ export const AuthProvider = ({ children }) => {
         explorerUrl: "https://explorer.testnet.near.org",
       };
       const near = await connect(connectionConfig);
-      
+      let account = null
       try {
         const account = await near.account(user.email.split("@")[0] + ".testnet");
-        console.log(account.accountId)
-        //const accountCreation = await near.createAccount(user.email.split("@")[0] + ".testnet", keyPair.publicKey);
-        //console.log(accountCreation)
+        
+        if(account.accountId != user.email.split("@")[0] + ".testnet"){
+          const accountCreation = await near.createAccount(user.email.split("@")[0] + ".testnet", keyPair.publicKey);
+          console.log(accountCreation)
+        }
         
       } catch (error) {
         console.log(error)
       }
-      
+      console.log(account.accountId)
       const tx = await account.functionCall({
         contractId: contractId,
         methodName: method,
