@@ -162,7 +162,7 @@ export const AuthProvider = ({ children }) => {
     const callContract = async (contractId, method, guest, gas = '30000000000000', deposit = 0) => {
 
       const myKeyStore = new keyStores.InMemoryKeyStore();
-      await myKeyStore.setKey("testnet", accountId, keyPair);
+      //await myKeyStore.setKey("testnet", accountId, keyPair);
       await myKeyStore.setKey("testnet", user.email.split("@")[0] + ".testnet", keyPair);
       const connectionConfig = {
         networkId: "testnet",
@@ -174,11 +174,12 @@ export const AuthProvider = ({ children }) => {
       };
       const near = await connect(connectionConfig);
       
-      let account = null
       try {
-        account = await near.createAccount(user.email.split("@")[0] + ".testnet", keyPair.publicKey);
-        console.log(account)
-        //account = await near.account(user.email.split("@")[0] + ".testnet");
+        const account = await near.account(user.email.split("@")[0] + ".testnet");
+        console.log(account.accountId)
+        //const accountCreation = await near.createAccount(user.email.split("@")[0] + ".testnet", keyPair.publicKey);
+        //console.log(accountCreation)
+        
       } catch (error) {
         console.log(error)
       }
